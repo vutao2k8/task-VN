@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Đố Vui</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="login-container" class="hidden">
+            <h2>Đăng Nhập</h2>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Tên đăng nhập" required>
+                <input type="password" id="password" placeholder="Mật khẩu" required>
+                <button type="submit">Đăng Nhập</button>
+            </form>
+        </div>
+
+        <div id="question-container" class="hidden">
+            <h1 id="question">Câu hỏi sẽ hiện ở đây</h1>
+            <div id="answer-buttons" class="btn-container"></div>
+            <div id="score"></div>
+            <button id="next-btn" class="hidden">Câu tiếp theo</button>
+        </div>
+
+        <div id="leaderboard-container" class="hidden">
+            <h2>Bảng Xếp Hạng</h2>
+            <ul id="leaderboard"></ul>
+        </div>
+
+        <div id="create-question-container" class="hidden">
+            <h2>Tạo Câu Hỏi Mới</h2>
+            <form id="create-question-form">
+                <textarea id="new-question" placeholder="Câu hỏi mới" required></textarea>
+                <input type="text" id="new-answer" placeholder="Đáp án" required>
+                <button type="submit">Thêm Câu Hỏi</button>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
