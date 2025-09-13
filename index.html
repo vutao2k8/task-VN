@@ -245,31 +245,117 @@ const BG_COUNT = 34;                // number of background images (bg1.jpg ... 
 const BG_PREFIX = 'bg';            // change if your naming different (bg1.jpg etc)
 const BG_EXT = '.jpg';             // extension for background images
 
-// Sample QUESTIONS: default placeholders. Replace with real questions by editing this array.
-const questions = (function buildQuestions() {
-  const base = [
-    "Ai là người sáng lập nước Văn Lang?",
-    "Ai là người lãnh đạo khởi nghĩa Lam Sơn?",
-    "Ai viết Bình Ngô đại cáo?",
-    "Ai là danh tướng dẹp Tống và Bình Chiêm?",
-    "Ai là người thắng trận Bạch Đằng?",
-    "Ai xây dựng kinh thành Thăng Long?",
-    "Ai là vị vua dưới thời Lý nổi tiếng?",
-    "Ai là danh y Hải Thượng Lãn Ông?",
-    "Ai là nhà thơ nổi tiếng đất Bắc?",
-    "Ai là người sáng lập triều Nguyễn?"
-  ];
-  const arr = [];
-  for(let i=1;i<=TOTAL_QUESTIONS;i++){
-    const idx = (i-1) % base.length;
-    arr.push({
-      question: `(${i}) ${base[idx]}`,
-      // placeholder answers: please replace with correct answers in production
-      answer: `Đáp án ${i}` 
-    });
-  }
-  return arr;
-})();
+const questions = [
+  { question: "(1) Ai là người sáng lập nước Văn Lang?", answer: "Hùng Vương" },
+  { question: "(2) Ai là người lãnh đạo khởi nghĩa Lam Sơn?", answer: "Lê Lợi" },
+  { question: "(3) Ai viết Bình Ngô đại cáo?", answer: "Nguyễn Trãi" },
+  { question: "(4) Ai là danh tướng dẹp Tống và Bình Chiêm?", answer: "Lý Thường Kiệt" },
+  { question: "(5) Ai là người thắng trận Bạch Đằng năm 938?", answer: "Ngô Quyền" },
+  { question: "(6) Ai xây dựng kinh thành Thăng Long?", answer: "Lý Công Uẩn" },
+  { question: "(7) Ai là vị vua có niên hiệu Thánh Tông nhà Lý?", answer: "Lý Thánh Tông" },
+  { question: "(8) Ai là danh y nổi tiếng với tên Hải Thượng Lãn Ông?", answer: "Lê Hữu Trác" },
+  { question: "(9) Ai là tác giả Truyện Kiều?", answer: "Nguyễn Du" },
+  { question: "(10) Ai là người sáng lập triều Nguyễn?", answer: "Gia Long" },
+
+  { question: "(11) Ai được gọi là Anh hùng áo vải?", answer: "Quang Trung" },
+  { question: "(12) Ai là nữ tướng nổi tiếng thời Hai Bà Trưng?", answer: "Bùi Thị Xuân" },
+  { question: "(13) Ai là tổng đốc tử thủ thành Hà Nội năm 1882?", answer: "Hoàng Diệu" },
+  { question: "(14) Ai là người có công cải cách ruộng đất ở Bắc Bộ?", answer: "Nguyễn Công Trứ" },
+  { question: "(15) Ai là người “thay áo hoàng bào cứu vua”?", answer: "Lê Lai" },
+  { question: "(16) Ai là danh tướng thủy quân triều Trần?", answer: "Trần Hưng Đạo" },
+  { question: "(17) Ai là nữ anh hùng dân tộc, người Tày?", answer: "Nùng Trí Cao" },
+  { question: "(18) Ai là người sáng lập đạo Cao Đài?", answer: "Ngô Văn Chiêu" },
+  { question: "(19) Ai là vua nổi tiếng với chính sách “Ngụ binh ư nông”?", answer: "Trần Hưng Đạo" },
+  { question: "(20) Ai là nhà toán học nổi tiếng thời Lê?", answer: "Lương Thế Vinh" },
+
+  { question: "(21) Hồ Hoàn Kiếm gắn với truyền thuyết vua nào?", answer: "Lê Lợi" },
+  { question: "(22) Văn Miếu – Quốc Tử Giám được lập dưới triều nào?", answer: "Lý Thánh Tông" },
+  { question: "(23) Ai là vua đầu tiên đặt niên hiệu ở Việt Nam?", answer: "Lý Nam Đế" },
+  { question: "(24) Ai là tác giả Hịch tướng sĩ?", answer: "Trần Hưng Đạo" },
+  { question: "(25) Ai là người chế tạo súng thần công?", answer: "Trần Đại Nghĩa" },
+  { question: "(26) Ai là người đánh đuổi quân Nguyên Mông lần 3?", answer: "Trần Nhân Tông" },
+  { question: "(27) Ai là nữ anh hùng mở đầu khởi nghĩa chống Bắc thuộc?", answer: "Hai Bà Trưng" },
+  { question: "(28) Ai là người chỉ huy khởi nghĩa Bãi Sậy?", answer: "Nguyễn Thiện Thuật" },
+  { question: "(29) Ai là vua cuối cùng của triều Lê?", answer: "Lê Chiêu Thống" },
+  { question: "(30) Ai là vua cuối cùng của triều Nguyễn?", answer: "Bảo Đại" },
+
+  { question: "(31) Quốc hiệu đầu tiên của nước ta là gì?", answer: "Văn Lang" },
+  { question: "(32) Quốc hiệu Đại Việt được đặt dưới triều nào?", answer: "Lý" },
+  { question: "(33) Quốc hiệu Đại Ngu thuộc triều nào?", answer: "Hồ" },
+  { question: "(34) Ai là thủ lĩnh nghĩa quân Tây Sơn?", answer: "Nguyễn Huệ" },
+  { question: "(35) Ai là vua có công khai hoang vùng Đồng Tháp Mười?", answer: "Nguyễn Ánh" },
+  { question: "(36) Ai là người chế ra chữ quốc ngữ?", answer: "Alexandre de Rhodes" },
+  { question: "(37) Ai là người khởi xướng phong trào Đông Du?", answer: "Phan Bội Châu" },
+  { question: "(38) Ai là nhà yêu nước chủ trương Duy Tân?", answer: "Phan Chu Trinh" },
+  { question: "(39) Ai là người sáng tác Quốc ca Việt Nam?", answer: "Văn Cao" },
+  { question: "(40) Ai là Chủ tịch nước Việt Nam Dân chủ Cộng hòa đầu tiên?", answer: "Hồ Chí Minh" },
+
+  { question: "(41) Ai là tổng tư lệnh Quân đội Nhân dân Việt Nam?", answer: "Võ Nguyên Giáp" },
+  { question: "(42) Trận Điện Biên Phủ diễn ra năm nào?", answer: "1954" },
+  { question: "(43) Hiệp định Paris được ký kết năm nào?", answer: "1973" },
+  { question: "(44) Ai là phi công bắn rơi nhiều máy bay Mỹ nhất?", answer: "Nguyễn Văn Cốc" },
+  { question: "(45) Ai là anh hùng liệt sĩ Lái Thiêu?", answer: "Nguyễn Văn Trỗi" },
+  { question: "(46) Ai là thiếu nhi anh hùng ở Nghệ An?", answer: "Kim Đồng" },
+  { question: "(47) Ai là Tổng Bí thư đầu tiên của Đảng?", answer: "Trần Phú" },
+  { question: "(48) Ai là Tổng Bí thư trong Cách mạng tháng Tám?", answer: "Trường Chinh" },
+  { question: "(49) Quốc khánh Việt Nam là ngày nào?", answer: "2/9/1945" },
+  { question: "(50) Ngày Giải phóng miền Nam là ngày nào?", answer: "30/4/1975" },
+
+  { question: "(51) Ai là người khởi nghĩa Yên Thế?", answer: "Hoàng Hoa Thám" },
+  { question: "(52) Ai là vua lập ra triều Tiền Lê?", answer: "Lê Đại Hành" },
+  { question: "(53) Ai là người đánh tan quân Nam Hán trên sông Bạch Đằng?", answer: "Ngô Quyền" },
+  { question: "(54) Ai là vị vua có công dời đô ra Thăng Long?", answer: "Lý Công Uẩn" },
+  { question: "(55) Ai là vị vua đặt quốc hiệu Đại Cồ Việt?", answer: "Đinh Tiên Hoàng" },
+  { question: "(56) Ai là người khai sáng triều Trần?", answer: "Trần Thái Tông" },
+  { question: "(57) Ai là nữ chính cung của vua Quang Trung?", answer: "Ngọc Hân công chúa" },
+  { question: "(58) Ai là vua đầu tiên của triều Lý?", answer: "Lý Công Uẩn" },
+  { question: "(59) Ai là nhà sử học viết Đại Việt sử ký toàn thư?", answer: "Ngô Sĩ Liên" },
+  { question: "(60) Ai là thi sĩ tác giả Chinh phụ ngâm?", answer: "Đặng Trần Côn" },
+
+  { question: "(61) Ai là nhà thơ làm quan triều Mạc, nổi tiếng với Truyền kỳ mạn lục?", answer: "Nguyễn Dữ" },
+  { question: "(62) Ai là người đặt nền móng văn học chữ Nôm?", answer: "Nguyễn Trãi" },
+  { question: "(63) Ai là tác giả thơ “Nam quốc sơn hà”?", answer: "Lý Thường Kiệt" },
+  { question: "(64) Ai là nhà thơ trào phúng nổi tiếng?", answer: "Hồ Xuân Hương" },
+  { question: "(65) Ai là tác giả thơ “Hịch tướng sĩ”?", answer: "Trần Hưng Đạo" },
+  { question: "(66) Ai là tác giả “Bình Ngô đại cáo”?", answer: "Nguyễn Trãi" },
+  { question: "(67) Ai là người giữ thành Cửa Nam kiên cường?", answer: "Nguyễn Tri Phương" },
+  { question: "(68) Ai là vua có công mở mang bờ cõi phương Nam?", answer: "Nguyễn Hoàng" },
+  { question: "(69) Ai là nhà văn hóa nổi tiếng thời Nguyễn?", answer: "Nguyễn Đình Chiểu" },
+  { question: "(70) Ai là nhà yêu nước với tác phẩm Hịch khởi nghĩa?", answer: "Phan Bội Châu" },
+
+  { question: "(71) Ai là người khai phá vùng đất Nam Bộ?", answer: "Nguyễn Hữu Cảnh" },
+  { question: "(72) Ai là nhà thơ nổi tiếng với tác phẩm Lục Vân Tiên?", answer: "Nguyễn Đình Chiểu" },
+  { question: "(73) Ai là vua có công thống nhất đất nước sau loạn 12 sứ quân?", answer: "Đinh Bộ Lĩnh" },
+  { question: "(74) Ai là người sáng lập triều Tây Sơn?", answer: "Nguyễn Nhạc" },
+  { question: "(75) Ai là người đánh tan quân Xiêm ở Rạch Gầm – Xoài Mút?", answer: "Nguyễn Huệ" },
+  { question: "(76) Ai là người khai sáng đạo Phật Việt Nam?", answer: "Khương Tăng Hội" },
+  { question: "(77) Ai là người lập ra hệ thống Văn Miếu?", answer: "Lý Thánh Tông" },
+  { question: "(78) Ai là danh tướng nổi tiếng triều Trần, em Trần Hưng Đạo?", answer: "Trần Quang Khải" },
+  { question: "(79) Ai là danh tướng nhà Lý, từng đánh Tống?", answer: "Tôn Đản" },
+  { question: "(80) Ai là anh hùng nông dân thế kỷ XVIII?", answer: "Nguyễn Tuyển" },
+
+  { question: "(81) Ai là vua khởi xướng cải cách Minh Trị ở Việt Nam?", answer: "Không có, ở Nhật Bản" },
+  { question: "(82) Ai là thủ lĩnh khởi nghĩa Hương Khê?", answer: "Phan Đình Phùng" },
+  { question: "(83) Ai là thủ lĩnh khởi nghĩa Ba Đình?", answer: "Đinh Công Tráng" },
+  { question: "(84) Ai là người thành lập Hội Việt Nam Cách mạng Thanh niên?", answer: "Nguyễn Ái Quốc" },
+  { question: "(85) Ai là người sáng lập báo Thanh Niên?", answer: "Nguyễn Ái Quốc" },
+  { question: "(86) Ai là người đọc Tuyên ngôn độc lập 2/9/1945?", answer: "Hồ Chí Minh" },
+  { question: "(87) Ai là người khởi nghĩa Nam Kỳ 1940?", answer: "Nguyễn Văn Cừ" },
+  { question: "(88) Ai là người chỉ huy quân Giải phóng tiến vào Dinh Độc Lập 1975?", answer: "Bùi Quang Thận" },
+  { question: "(89) Ai là nhạc sĩ sáng tác “Tiến quân ca”?", answer: "Văn Cao" },
+  { question: "(90) Ai là nhà thơ được mệnh danh là “ông hoàng thơ tình”?", answer: "Xuân Diệu" },
+
+  { question: "(91) Ai là nhà thơ với tập Nhật ký trong tù?", answer: "Hồ Chí Minh" },
+  { question: "(92) Ai là người thành lập Nhà máy in tiền đầu tiên?", answer: "Trần Đại Nghĩa" },
+  { question: "(93) Ai là người mở chiến dịch Hồ Chí Minh 1975?", answer: "Văn Tiến Dũng" },
+  { question: "(94) Ai là nhà thơ nổi tiếng với bài Tây Tiến?", answer: "Quang Dũng" },
+  { question: "(95) Ai là nhà văn với tác phẩm Vợ nhặt?", answer: "Kim Lân" },
+  { question: "(96) Ai là nhà văn với tác phẩm Chí Phèo?", answer: "Nam Cao" },
+  { question: "(97) Ai là nhà văn với tác phẩm Tắt đèn?", answer: "Ngô Tất Tố" },
+  { question: "(98) Ai là nhà văn với tác phẩm Số đỏ?", answer: "Vũ Trọng Phụng" },
+  { question: "(99) Ai là nhà thơ với tập Bên kia sông Đuống?", answer: "Hoàng Cầm" },
+  { question: "(100) Ai là nhà thơ nổi tiếng với tập Trường ca Mặt đường khát vọng?", answer: "Nguyễn Khoa Điềm" }
+];
 
 /* ===========================
    STATE
@@ -524,3 +610,4 @@ answerBtn.addEventListener('click', onAnswerSubmit);
 </script>
 </body>
 </html>
+
