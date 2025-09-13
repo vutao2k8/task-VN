@@ -1,43 +1,245 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trò Chơi Đố Vui</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trò Chơi Đố Vui</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 100%;
+      max-width: 500px;
+    }
+    h1,h2 {
+      color: #333;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .hidden {
+      display: none;
+    }
+    .btn-container {
+      margin: 15px 0;
+    }
+    #leaderboard {
+      list-style: none;
+      padding: 0;
+    }
+    #leaderboard li {
+      background: #f2f2f2;
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: left;
+      font-weight: bold;
+    }
+    #score {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    /* Toast popup */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      z-index: 1000;
+    }
+    @keyframes fadein { from {opacity:0;} to {opacity:1;} }
+    @keyframes fadeout { from {opacity:1;} to {opacity:0;} }
+    .replay-btn {
+      background: #2196F3;
+      margin-top: 15px;
+    }
+    .replay-btn:hover {
+      background: #1976D2;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div id="login-container" class="hidden">
-            <h2>Đăng Nhập</h2>
-            <form id="login-form">
-                <input type="text" id="username" placeholder="Tên đăng nhập" required>
-                <input type="password" id="password" placeholder="Mật khẩu" required>
-                <button type="submit">Đăng Nhập</button>
-            </form>
-        </div>
-
-        <div id="question-container" class="hidden">
-            <h1 id="question">Câu hỏi sẽ hiện ở đây</h1>
-            <div id="answer-buttons" class="btn-container"></div>
-            <div id="score"></div>
-            <button id="next-btn" class="hidden">Câu tiếp theo</button>
-        </div>
-
-        <div id="leaderboard-container" class="hidden">
-            <h2>Bảng Xếp Hạng</h2>
-            <ul id="leaderboard"></ul>
-        </div>
-
-        <div id="create-question-container" class="hidden">
-            <h2>Tạo Câu Hỏi Mới</h2>
-            <form id="create-question-form">
-                <textarea id="new-question" placeholder="Câu hỏi mới" required></textarea>
-                <input type="text" id="new-answer" placeholder="Đáp án" required>
-                <button type="submit">Thêm Câu Hỏi</button>
-            </form>
-        </div>
+  <div class="container">
+    <div id="login-container">
+      <h2>Đăng Nhập</h2>
+      <form id="login-form">
+        <input type="text" id="player-name" placeholder="Tên của bạn" required>
+        <button type="submit">Bắt đầu chơi</button>
+      </form>
     </div>
-    <script src="script.js"></script>
+
+    <div id="question-container" class="hidden">
+      <h1 id="question">Câu hỏi sẽ hiện ở đây</h1>
+      <div id="answer-buttons" class="btn-container"></div>
+      <div id="score"></div>
+      <button id="next-btn" class="hidden">Câu tiếp theo</button>
+    </div>
+
+    <div id="leaderboard-container" class="hidden">
+      <h2>Bảng Xếp Hạng</h2>
+      <ul id="leaderboard"></ul>
+      <button class="replay-btn" onclick="location.reload()">Chơi lại</button>
+    </div>
+
+    <div id="create-question-container" class="hidden">
+      <h2>Tạo Câu Hỏi Mới</h2>
+      <form id="create-question-form">
+        <textarea id="new-question" placeholder="Câu hỏi mới" required></textarea>
+        <input type="text" id="new-answer" placeholder="Đáp án" required>
+        <button type="submit">Thêm Câu Hỏi</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const questions = [
+        { question: "Lê triều sử ký soạn thành, họ Ngô?", answer: "Ngô Thì Nhậm" },
+        { question: "Bình Chiêm, dẹp Tống, Lý trào nổi danh?", answer: "Lý Thường Kiệt" },
+        { question: "Vua nào mặt sắt đen sì?", answer: "Mai Hắc Đế" },
+        { question: "Đục chìm thuyền địch dưới sông Bạch Đằng?", answer: "Yết Kiêu" },
+        { question: "Đại vương bẻ gãy sừng trâu?", answer: "Phùng Hưng" },
+        { question: "Anh hùng đại thắng Đống Đa?", answer: "Nguyễn Huệ" }
+      ];
+
+      const loginContainer = document.getElementById('login-container');
+      const questionContainer = document.getElementById('question-container');
+      const leaderboardContainer = document.getElementById('leaderboard-container');
+      const createQuestionContainer = document.getElementById('create-question-container');
+      const loginForm = document.getElementById('login-form');
+      const createQuestionForm = document.getElementById('create-question-form');
+      const questionElement = document.getElementById('question');
+      const answerButtons = document.getElementById('answer-buttons');
+      const nextButton = document.getElementById('next-btn');
+      const leaderboard = document.getElementById('leaderboard');
+      const newQuestion = document.getElementById('new-question');
+      const newAnswer = document.getElementById('new-answer');
+      const scoreDiv = document.getElementById('score');
+
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let playerName = "";
+      const pointsPerQuestion = 10;
+
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        playerName = document.getElementById('player-name').value.trim() || "Người chơi";
+        loginContainer.classList.add('hidden');
+        questionContainer.classList.remove('hidden');
+        showQuestion(questions[currentQuestionIndex]);
+      });
+
+      createQuestionForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = newQuestion.value.trim();
+        const a = newAnswer.value.trim();
+        if (q && a) {
+          questions.push({ question: q, answer: a });
+          newQuestion.value = '';
+          newAnswer.value = '';
+          toast("✅ Câu hỏi mới đã được thêm!");
+        }
+      });
+
+      nextButton.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          showQuestion(questions[currentQuestionIndex]);
+        } else {
+          endGame();
+        }
+      });
+
+      function showQuestion(q) {
+        questionElement.innerText = q.question;
+        answerButtons.innerHTML = '';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'user-answer';
+        input.placeholder = 'Nhập câu trả lời...';
+        answerButtons.appendChild(input);
+
+        const submitButton = document.createElement('button');
+        submitButton.innerText = 'Trả lời';
+        submitButton.addEventListener('click', () => checkAnswer(input.value, q.answer));
+        answerButtons.appendChild(submitButton);
+
+        nextButton.classList.add('hidden');
+        scoreDiv.innerText = `Điểm: ${score}`;
+      }
+
+      function checkAnswer(userAnswer, correctAnswer) {
+        if (userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
+          score += pointsPerQuestion;
+          toast("🎉 Chính xác!");
+        } else {
+          toast(`❌ Sai! Đáp án đúng: ${correctAnswer}`);
+        }
+        nextButton.classList.remove('hidden');
+        scoreDiv.innerText = `Điểm: ${score}`;
+      }
+
+      function endGame() {
+        questionContainer.classList.add('hidden');
+        leaderboardContainer.classList.remove('hidden');
+        saveScore();
+        displayLeaderboard();
+      }
+
+      function saveScore() {
+        const scores = JSON.parse(localStorage.getItem('leaderboard') || "[]");
+        scores.push({ name: playerName, score });
+        scores.sort((a, b) => b.score - a.score);
+        localStorage.setItem('leaderboard', JSON.stringify(scores.slice(0, 5)));
+      }
+
+      function displayLeaderboard() {
+        const scores = JSON.parse(localStorage.getItem('leaderboard') || "[]");
+        leaderboard.innerHTML = scores
+          .map((s, i) => `<li>${i + 1}. ${s.name} - ${s.score} điểm</li>`)
+          .join('');
+      }
+
+      function toast(msg) {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerText = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      }
+    });
+  </script>
 </body>
 </html>
