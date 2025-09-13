@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trò Chơi Đố Vui</title>
+  <title>Tank VN - Táo Bắc Việt Team</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #74ebd5, #9face6);
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
       margin: 0;
       display: flex;
       justify-content: center;
@@ -15,16 +16,23 @@
       height: 100vh;
     }
     .container {
-      background: white;
+      background: #fff;
       padding: 20px 30px;
       border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
       text-align: center;
-      width: 100%;
-      max-width: 500px;
+      width: 95%;
+      max-width: 550px;
+      position: relative;
     }
-    h1,h2 {
-      color: #333;
+    h1, h2 {
+      margin: 10px 0;
+      color: #222;
+    }
+    img#logo {
+      width: 120px;
+      display: block;
+      margin: 0 auto 10px auto;
     }
     input, textarea, button {
       width: 100%;
@@ -42,31 +50,29 @@
       transition: 0.2s;
     }
     button:hover {
-      background: #45a049;
+      background: #388E3C;
     }
-    .hidden {
-      display: none;
-    }
-    .btn-container {
-      margin: 15px 0;
-    }
+    .hidden { display: none; }
     #leaderboard {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
     #leaderboard li {
-      background: #f2f2f2;
+      background: #f8f9fa;
       margin: 6px 0;
       padding: 10px;
       border-radius: 6px;
-      text-align: left;
       font-weight: bold;
+      border: 1px solid #ddd;
+      text-align: left;
     }
     #score {
-      font-weight: bold;
       margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
     }
-    /* Toast popup */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -87,10 +93,19 @@
     .replay-btn:hover {
       background: #1976D2;
     }
+    footer {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <img id="logo" src="logo.png" alt="Tank VN Logo">
+    <h1>Tank VN</h1>
+    <p>© Bản quyền thuộc về <b>Táo Bắc Việt Team</b></p>
+
     <div id="login-container">
       <h2>Đăng Nhập</h2>
       <form id="login-form">
@@ -100,9 +115,9 @@
     </div>
 
     <div id="question-container" class="hidden">
-      <h1 id="question">Câu hỏi sẽ hiện ở đây</h1>
-      <div id="answer-buttons" class="btn-container"></div>
-      <div id="score"></div>
+      <h2 id="question">Câu hỏi sẽ hiện ở đây</h2>
+      <div id="answer-buttons"></div>
+      <div id="score">Điểm: 0</div>
       <button id="next-btn" class="hidden">Câu tiếp theo</button>
     </div>
 
@@ -112,45 +127,35 @@
       <button class="replay-btn" onclick="location.reload()">Chơi lại</button>
     </div>
 
-    <div id="create-question-container" class="hidden">
-      <h2>Tạo Câu Hỏi Mới</h2>
-      <form id="create-question-form">
-        <textarea id="new-question" placeholder="Câu hỏi mới" required></textarea>
-        <input type="text" id="new-answer" placeholder="Đáp án" required>
-        <button type="submit">Thêm Câu Hỏi</button>
-      </form>
-    </div>
+    <footer>
+      Code by <b>Táo Đỏ</b> | Ý tưởng by <b>Táo Xanh Lá</b> | Ảnh: <b>NVT Studio</b>
+    </footer>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const questions = [
-        { question: "Lê triều sử ký soạn thành, họ Ngô?", answer: "Ngô Thì Nhậm" },
-        { question: "Bình Chiêm, dẹp Tống, Lý trào nổi danh?", answer: "Lý Thường Kiệt" },
-        { question: "Vua nào mặt sắt đen sì?", answer: "Mai Hắc Đế" },
-        { question: "Đục chìm thuyền địch dưới sông Bạch Đằng?", answer: "Yết Kiêu" },
-        { question: "Đại vương bẻ gãy sừng trâu?", answer: "Phùng Hưng" },
-        { question: "Anh hùng đại thắng Đống Đa?", answer: "Nguyễn Huệ" }
+        { question: "Ai là người soạn Lê triều sử ký?", answer: "Ngô Thì Nhậm" },
+        { question: "Danh tướng nào dẹp Tống, bình Chiêm?", answer: "Lý Thường Kiệt" },
+        { question: "Anh hùng đại thắng Đống Đa?", answer: "Nguyễn Huệ" },
+        { question: "Vua nào sáng lập nhà Lý?", answer: "Lý Công Uẩn" },
+        { question: "Nữ tướng nổi tiếng Tây Sơn?", answer: "Bùi Thị Xuân" }
       ];
 
       const loginContainer = document.getElementById('login-container');
       const questionContainer = document.getElementById('question-container');
       const leaderboardContainer = document.getElementById('leaderboard-container');
-      const createQuestionContainer = document.getElementById('create-question-container');
       const loginForm = document.getElementById('login-form');
-      const createQuestionForm = document.getElementById('create-question-form');
       const questionElement = document.getElementById('question');
       const answerButtons = document.getElementById('answer-buttons');
       const nextButton = document.getElementById('next-btn');
       const leaderboard = document.getElementById('leaderboard');
-      const newQuestion = document.getElementById('new-question');
-      const newAnswer = document.getElementById('new-answer');
       const scoreDiv = document.getElementById('score');
 
       let currentQuestionIndex = 0;
       let score = 0;
+      let combo = 0;
       let playerName = "";
-      const pointsPerQuestion = 10;
 
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -158,18 +163,6 @@
         loginContainer.classList.add('hidden');
         questionContainer.classList.remove('hidden');
         showQuestion(questions[currentQuestionIndex]);
-      });
-
-      createQuestionForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const q = newQuestion.value.trim();
-        const a = newAnswer.value.trim();
-        if (q && a) {
-          questions.push({ question: q, answer: a });
-          newQuestion.value = '';
-          newAnswer.value = '';
-          toast("✅ Câu hỏi mới đã được thêm!");
-        }
       });
 
       nextButton.addEventListener('click', () => {
@@ -202,9 +195,12 @@
 
       function checkAnswer(userAnswer, correctAnswer) {
         if (userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
-          score += pointsPerQuestion;
-          toast("🎉 Chính xác!");
+          combo++;
+          let bonus = 10 * combo; 
+          score += bonus;
+          toast(`🎉 Chính xác! (+${bonus} điểm, combo x${combo})`);
         } else {
+          combo = 0;
           toast(`❌ Sai! Đáp án đúng: ${correctAnswer}`);
         }
         nextButton.classList.remove('hidden');
@@ -219,14 +215,14 @@
       }
 
       function saveScore() {
-        const scores = JSON.parse(localStorage.getItem('leaderboard') || "[]");
+        const scores = JSON.parse(localStorage.getItem('tankvn-leaderboard') || "[]");
         scores.push({ name: playerName, score });
         scores.sort((a, b) => b.score - a.score);
-        localStorage.setItem('leaderboard', JSON.stringify(scores.slice(0, 5)));
+        localStorage.setItem('tankvn-leaderboard', JSON.stringify(scores.slice(0, 5)));
       }
 
       function displayLeaderboard() {
-        const scores = JSON.parse(localStorage.getItem('leaderboard') || "[]");
+        const scores = JSON.parse(localStorage.getItem('tankvn-leaderboard') || "[]");
         leaderboard.innerHTML = scores
           .map((s, i) => `<li>${i + 1}. ${s.name} - ${s.score} điểm</li>`)
           .join('');
