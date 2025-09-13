@@ -1,222 +1,526 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tank VN - Trò Chơi Đố Vui</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #f7b733, #fc4a1a);
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-    }
-    h1, h2 {
-      margin-bottom: 15px;
-    }
-    input, textarea, button {
-      margin: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    .hidden {
-      display: none;
-    }
-    #leaderboard {
-      list-style: none;
-      padding: 0;
-    }
-    #leaderboard li {
-      background: rgba(0,0,0,0.3);
-      margin: 5px;
-      padding: 10px;
-      border-radius: 6px;
-    }
-    footer {
-      margin-top: 20px;
-      font-size: 14px;
-      background: rgba(0,0,0,0.4);
-      padding: 10px;
-      border-radius: 10px;
-    }
-    img.logo {
-      width: 80px;
-      margin: 15px auto;
-      display: block;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tank VN - Trò Chơi Đố Vui (Táo Bắc Việt Team)</title>
+<link rel="icon" href="favicon.png" type="image/png" />
+<style>
+  :root{
+    --glass-bg: rgba(0,0,0,0.65);
+    --accent: #ffcc00;
+    --correct: #1db954;
+    --wrong: #e53e3e;
+    --white: #ffffff;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--white);}
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:#222;
+    transition: background 0.5s ease;
+  }
+
+  /* Slideshow background container (full-screen) */
+  .bg-slideshow{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background:linear-gradient(135deg,#283048,#859398);
+    background-size:cover;
+    background-position:center;
+  }
+
+  /* overlay to dim slideshow */
+  .bg-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:1;
+  }
+
+  /* Main card */
+  .card{
+    position:relative;
+    z-index:2;
+    width:min(920px,94%);
+    max-width:920px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.55));
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.6);
+    display:grid;
+    grid-template-columns: 1fr 360px;
+    gap:18px;
+    align-items:start;
+    color:var(--white);
+    border:1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Left: question area */
+  .left {
+    padding:12px;
+  }
+  .logo {
+    width:86px; height:86px; object-fit:contain; border-radius:8px; background:rgba(255,255,255,0.06); padding:8px;
+  }
+  .title { font-size:22px; margin:8px 0 4px 0; color:var(--accent); font-weight:700; }
+  .subtitle { font-size:13px; color:rgba(255,255,255,0.85); margin-bottom:12px; }
+
+  /* Question box: black glass */
+  .question-box{
+    background: var(--glass-bg);
+    border-radius:10px;
+    padding:18px;
+    min-height:160px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:12px;
+    border:1px solid rgba(255,255,255,0.05);
+  }
+  .question-text{
+    color:var(--white);
+    font-size:20px;
+    line-height:1.25;
+    font-weight:600;
+  }
+
+  .answer-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-top:6px;
+  }
+
+  input[type="text"]{
+    flex:1;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.04);
+    color:var(--white);
+    outline:none;
+    font-size:15px;
+  }
+  button.btn{
+    padding:10px 14px;
+    border-radius:8px;
+    border:none;
+    background:var(--accent);
+    color:#111;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.btn:disabled{opacity:0.6; cursor:not-allowed;}
+
+  .meta {
+    display:flex;
+    gap:12px;
+    margin-top:8px;
+    color:rgba(255,255,255,0.85);
+    font-size:13px;
+  }
+
+  /* Right: leaderboard & controls */
+  .right {
+    padding:12px;
+  }
+  .card-panel{
+    background: rgba(255,255,255,0.04);
+    padding:12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  h3{margin:6px 0 8px 0;}
+  ul.leaderboard-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+  ul.leaderboard-list li{
+    background: rgba(0,0,0,0.25);
+    padding:8px 10px;
+    border-radius:8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-weight:600;
+    color:var(--white);
+  }
+
+  .small { font-size:13px; color:rgba(255,255,255,0.8); }
+
+  /* Toast (center big) */
+  .center-toast{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    z-index:999;
+    min-width:320px;
+    max-width:90%;
+    background:rgba(0,0,0,0.8);
+    color:var(--white);
+    border-radius:12px;
+    padding:18px 20px;
+    text-align:center;
+    box-shadow:0 12px 40px rgba(0,0,0,0.6);
+    border:3px solid rgba(255,255,255,0.06);
+    display:none;
+  }
+  .center-toast.correct{ background: linear-gradient(90deg, rgba(27, 189, 120,0.95), rgba(29,185,144,0.95)); color:#fff;}
+  .center-toast.wrong{ background: linear-gradient(90deg, rgba(224,78,78,0.95), rgba(229,62,62,0.95)); color:#fff;}
+  .center-toast h2{ margin:0 0 6px 0; font-size:20px; }
+  .center-toast p{ margin:0; opacity:0.95; font-weight:600;}
+  .center-toast .next-note{ margin-top:10px; font-size:13px; opacity:0.95;}
+
+  /* responsive */
+  @media (max-width:860px){
+    .card{ grid-template-columns:1fr; max-width:94%; }
+    .right{ order:2; }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <img src="logo.png" alt="Logo Táo Bắc Việt Team" class="logo">
-    <h1>Tank VN - Trò Chơi Đố Vui</h1>
+  <!-- background slideshow -->
+  <div id="bg" class="bg-slideshow"></div>
+  <div class="bg-overlay"></div>
 
-    <div id="login-container">
-      <h2>Đăng Nhập</h2>
-      <form id="login-form">
-        <input type="text" id="username" placeholder="Tên đăng nhập" required>
-        <input type="password" id="password" placeholder="Mật khẩu" required>
-        <button type="submit">Đăng Nhập</button>
-      </form>
-    </div>
+  <main class="card" role="main">
+    <section class="left">
+      <img src="logo.png" alt="logo" class="logo" />
+      <div class="title">Tank VN — Trò Chơi Đố Vui</div>
+      <div class="subtitle">© Táo Bắc Việt Team — Code by Táo Đỏ · Ý tưởng: Táo Xanh Lá · Ảnh: NVT Studio</div>
 
-    <div id="question-container" class="hidden">
-      <h2 id="question">Câu hỏi sẽ hiện ở đây</h2>
-      <div id="answer-buttons"></div>
-      <div id="score">Điểm: 0</div>
-    </div>
+      <div id="questionArea" class="question-box">
+        <div id="questionText" class="question-text">Vui lòng đăng nhập để bắt đầu.</div>
 
-    <div id="leaderboard-container" class="hidden">
-      <h2>Bảng Xếp Hạng</h2>
-      <ul id="leaderboard"></ul>
-    </div>
+        <div class="answer-row">
+          <input id="answerInput" type="text" placeholder="Nhập đáp án..." autocomplete="off" />
+          <button id="answerBtn" class="btn">Trả lời</button>
+        </div>
 
-    <div id="create-question-container" class="hidden">
-      <h2>Tạo Câu Hỏi Mới</h2>
-      <form id="create-question-form">
-        <textarea id="new-question" placeholder="Câu hỏi mới" required></textarea>
-        <input type="text" id="new-answer" placeholder="Đáp án" required>
-        <button type="submit">Thêm Câu Hỏi</button>
-      </form>
-    </div>
+        <div class="meta">
+          <div id="scoreDisplay" class="small">Điểm: 0 / 100</div>
+          <div id="qIndexDisplay" class="small">Câu: 0 / 100</div>
+        </div>
+      </div>
 
-    <footer>
-      <p>© 2025 Táo Bắc Việt Team</p>
-      <p>Code by Táo Đỏ | Ý tưởng by Táo Xanh Lá | Ảnh thiết kế bởi NVT Studio</p>
-    </footer>
+    </section>
+
+    <aside class="right">
+      <div class="card-panel">
+        <h3>Người chơi</h3>
+        <div id="loginPanel">
+          <input id="playerName" type="text" placeholder="Tên của bạn" />
+          <button id="startBtn" class="btn" style="margin-top:8px;">Bắt đầu</button>
+        </div>
+        <div id="inGameInfo" style="display:none;">
+          <div class="small">Người chơi: <strong id="playerNameShow"></strong></div>
+          <div style="height:10px"></div>
+          <button id="restartBtn" class="btn" style="background:#ff6b6b;">Chơi lại</button>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="card-panel">
+        <h3>Bảng xếp hạng (Top)</h3>
+        <ul id="leaderboard" class="leaderboard-list"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <!-- center toast -->
+  <div id="centerToast" class="center-toast" role="status" aria-live="polite">
+    <h2 id="toastTitle">Đáp án chính xác!</h2>
+    <p id="toastMsg">Bạn giành 1 điểm</p>
+    <div class="next-note">Chuyển câu tiếp sau <span id="countdown">5</span>s...</div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const questions = [
-        { question: "Lê triều sử ký soạn thành, họ Ngô?", answer: "Ngô Thì Nhậm" },
-        { question: "Bình Chiêm, dẹp Tống, Lý trào nổi danh?", answer: "Lý Thường Kiệt" },
-        { question: "Vua nào mặt sắt đen sì?", answer: "Mai Hắc Đế" },
-        { question: "Đục chìm thuyền địch dưới sông Bạch Đằng?", answer: "Yết Kiêu" },
-        { question: "Đại vương bẻ gãy sừng trâu?", answer: "Phùng Hưng" },
-        { question: "Lừng danh duyên hải dinh điền là ai?", answer: "Nguyễn Công Trứ" },
-        { question: "Còn ai đổi mặc hoàng bào?", answer: "Lê Lai" },
-        { question: "Hà- Ninh tổng đốc vị thành vong thân?", answer: "Hoàng Diệu" },
-        { question: "Vua nào trong buổi hàn vi ở chùa?", answer: "Lý Công Uẩn" },
-        { question: "Đông y lừng tiếng danh sư?", answer: "Hải Thượng Lãn Ông" },
-        { question: "Mùa xuân nào phá quân Thanh?", answer: "Kỷ Dậu" },
-        { question: "Móng rùa thần tặng vua nào?", answer: "An Dương Vương" },
-        { question: "Tướng nào bẻ gậy phò vua?", answer: "Quang Trung" },
-        { question: "Tây Sơn có nữ tướng tài?", answer: "Bùi Thị Xuân" }
-      ];
+<script>
+/* ===========================
+   CONFIG & DATA
+   =========================== */
+const TOTAL_QUESTIONS = 100;
+const SLIDESHOW_INTERVAL_MS = 5000; // change background every 5s
+const TOAST_SHOW_SECONDS = 5;       // show toast for 5s before next question
+const BG_COUNT = 34;                // number of background images (bg1.jpg ... bg34.jpg)
+const BG_PREFIX = 'bg';            // change if your naming different (bg1.jpg etc)
+const BG_EXT = '.jpg';             // extension for background images
 
-      const loginContainer = document.getElementById('login-container');
-      const questionContainer = document.getElementById('question-container');
-      const leaderboardContainer = document.getElementById('leaderboard-container');
-      const createQuestionContainer = document.getElementById('create-question-container');
-      const loginForm = document.getElementById('login-form');
-      const createQuestionForm = document.getElementById('create-question-form');
-      const questionElement = document.getElementById('question');
-      const answerButtons = document.getElementById('answer-buttons');
-      const leaderboard = document.getElementById('leaderboard');
-      const scoreElement = document.getElementById('score');
-      const newQuestion = document.getElementById('new-question');
-      const newAnswer = document.getElementById('new-answer');
-      const usernameInput = document.getElementById('username');
-
-      let currentQuestionIndex = 0;
-      let score = 0;
-      const maxScore = 100;
-      const pointsPerQuestion = maxScore / questions.length;
-      let username = "";
-
-      loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        username = usernameInput.value.trim();
-        if (!username) return;
-        loginContainer.classList.add('hidden');
-        questionContainer.classList.remove('hidden');
-        showQuestion(questions[currentQuestionIndex]);
-      });
-
-      createQuestionForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const question = newQuestion.value.trim();
-        const answer = newAnswer.value.trim();
-        if (question && answer) {
-          questions.push({ question, answer });
-          newQuestion.value = '';
-          newAnswer.value = '';
-          alert('Câu hỏi mới đã được thêm.');
-        }
-      });
-
-      function showQuestion(question) {
-        questionElement.innerText = question.question;
-        answerButtons.innerHTML = '';
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.id = 'user-answer';
-        input.placeholder = 'Trả lời';
-        answerButtons.appendChild(input);
-
-        const submitButton = document.createElement('button');
-        submitButton.innerText = 'Trả lời';
-        submitButton.addEventListener('click', () => {
-          checkAnswer(input.value, question.answer);
-        });
-        answerButtons.appendChild(submitButton);
-      }
-
-      function checkAnswer(userAnswer, correctAnswer) {
-        if (userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
-          score += pointsPerQuestion;
-        }
-        scoreElement.innerText = `Điểm: ${score}`;
-        currentQuestionIndex++;
-
-        if (currentQuestionIndex < questions.length) {
-          showQuestion(questions[currentQuestionIndex]);
-        } else {
-          questionContainer.classList.add('hidden');
-          leaderboardContainer.classList.remove('hidden');
-          saveScore(username, score);
-          displayLeaderboard();
-        }
-      }
-
-      function saveScore(name, score) {
-        let scores = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        scores.push({ name, score });
-        scores.sort((a, b) => b.score - a.score);
-        localStorage.setItem('leaderboard', JSON.stringify(scores));
-      }
-
-      function displayLeaderboard() {
-        leaderboard.innerHTML = '';
-        let scores = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        scores.forEach((entry, index) => {
-          const li = document.createElement('li');
-          li.textContent = `${index + 1}. ${entry.name} - ${entry.score} điểm`;
-          leaderboard.appendChild(li);
-        });
-      }
+// Sample QUESTIONS: default placeholders. Replace with real questions by editing this array.
+const questions = (function buildQuestions() {
+  const base = [
+    "Ai là người sáng lập nước Văn Lang?",
+    "Ai là người lãnh đạo khởi nghĩa Lam Sơn?",
+    "Ai viết Bình Ngô đại cáo?",
+    "Ai là danh tướng dẹp Tống và Bình Chiêm?",
+    "Ai là người thắng trận Bạch Đằng?",
+    "Ai xây dựng kinh thành Thăng Long?",
+    "Ai là vị vua dưới thời Lý nổi tiếng?",
+    "Ai là danh y Hải Thượng Lãn Ông?",
+    "Ai là nhà thơ nổi tiếng đất Bắc?",
+    "Ai là người sáng lập triều Nguyễn?"
+  ];
+  const arr = [];
+  for(let i=1;i<=TOTAL_QUESTIONS;i++){
+    const idx = (i-1) % base.length;
+    arr.push({
+      question: `(${i}) ${base[idx]}`,
+      // placeholder answers: please replace with correct answers in production
+      answer: `Đáp án ${i}` 
     });
-  </script>
+  }
+  return arr;
+})();
+
+/* ===========================
+   STATE
+   =========================== */
+let currentIndex = 0;
+let score = 0;
+let playerName = '';
+let answeringLocked = false;
+let toastTimer = null;
+let toastCountdownTimer = null;
+
+/* ===========================
+   DOM refs
+   =========================== */
+const bgEl = document.getElementById('bg');
+const qText = document.getElementById('questionText');
+const answerInput = document.getElementById('answerInput');
+const answerBtn = document.getElementById('answerBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const qIndexDisplay = document.getElementById('qIndexDisplay');
+
+const startBtn = document.getElementById('startBtn');
+const playerNameInput = document.getElementById('playerName');
+const playerNameShow = document.getElementById('playerNameShow');
+const restartBtn = document.getElementById('restartBtn');
+const loginPanel = document.getElementById('loginPanel');
+const inGameInfo = document.getElementById('inGameInfo');
+
+const centerToast = document.getElementById('centerToast');
+const toastTitle = document.getElementById('toastTitle');
+const toastMsg = document.getElementById('toastMsg');
+const countdownEl = document.getElementById('countdown');
+
+const leaderboardEl = document.getElementById('leaderboard');
+
+/* ===========================
+   AUDIO: Web Audio simple beeps
+   =========================== */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = AudioCtx ? new AudioCtx() : null;
+
+function beep(frequency=440, duration=150, type='sine', ramp=0.02){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = frequency;
+  g.gain.setValueAtTime(0, audioCtx.currentTime);
+  g.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + ramp);
+  g.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + duration/1000);
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start();
+  setTimeout(()=>{ try{o.stop()}catch(e){} }, duration+20);
+}
+
+function playCorrect(){
+  // short melody
+  beep(880,90); setTimeout(()=>beep(1100,70),90);
+}
+function playWrong(){
+  beep(240,300,'square');
+}
+
+/* ===========================
+   BACKGROUND SLIDESHOW
+   =========================== */
+let bgIndex = 1;
+function setBgImage(i){
+  // try build image URL
+  const url = `${BG_PREFIX}${i}${BG_EXT}`;
+  // preload to check if exists? We'll just set background; if not found browser shows broken image — but css background with url won't show error.
+  bgEl.style.background = `url("${url}") center/cover no-repeat`;
+}
+function startSlideshow(){
+  // initial
+  setBgImage(bgIndex);
+  setInterval(()=>{
+    bgIndex++;
+    if(bgIndex>BG_COUNT) bgIndex = 1;
+    setBgImage(bgIndex);
+  }, SLIDESHOW_INTERVAL_MS);
+}
+
+/* ===========================
+   UI helpers
+   =========================== */
+function updateUI(){
+  scoreDisplay.textContent = `Điểm: ${score} / ${TOTAL_QUESTIONS}`;
+  qIndexDisplay.textContent = `Câu: ${Math.min(currentIndex+1,TOTAL_QUESTIONS)} / ${TOTAL_QUESTIONS}`;
+}
+
+function showQuestion(idx){
+  const q = questions[idx];
+  qText.textContent = q.question;
+  answerInput.value = '';
+  answerInput.focus();
+  updateUI();
+  answeringLocked = false;
+  answerBtn.disabled = false;
+}
+
+function endGame(){
+  // save score
+  saveScore(playerName, score);
+  updateLeaderboard();
+  // show final toast then show top list area (we keep UI simple: replace question box by final toast)
+  showCenterToast(`Trò chơi kết thúc`, `Bạn: ${playerName} — Điểm: ${score}`, false, 5);
+}
+
+/* ===========================
+   ANSWER FLOW
+   =========================== */
+function onAnswerSubmit(){
+  if(answeringLocked) return;
+  answeringLocked = true;
+  const user = (answerInput.value || '').trim();
+  const correct = (questions[currentIndex].answer || '').trim();
+
+  // compare case-insensitive, normalized
+  const normalize = s => s.replace(/\s+/g,' ').trim().toLowerCase();
+  const isCorrect = normalize(user) === normalize(correct);
+
+  if(isCorrect){
+    score += 1;            // each question 1 điểm
+    playCorrect();
+    showCenterToast("Đáp án chính xác", `+1 điểm`, true, TOAST_SHOW_SECONDS);
+  } else {
+    playWrong();
+    showCenterToast("Sai rồi", `Đáp án đúng: ${correct}`, false, TOAST_SHOW_SECONDS);
+  }
+
+  updateUI();
+  answerBtn.disabled = true;
+  answerInput.disabled = true;
+
+  // after toast seconds -> move to next
+  let remaining = TOAST_SHOW_SECONDS;
+  countdownEl.textContent = remaining;
+  toastCountdownTimer = setInterval(()=>{
+    remaining--;
+    if(remaining>=0) countdownEl.textContent = remaining;
+  },1000);
+
+  toastTimer = setTimeout(()=>{
+    clearInterval(toastCountdownTimer);
+    hideCenterToast();
+    // next question
+    currentIndex++;
+    answerInput.disabled = false;
+    if(currentIndex < TOTAL_QUESTIONS && currentIndex < questions.length){
+      showQuestion(currentIndex);
+    } else {
+      endGame();
+    }
+  }, TOAST_SHOW_SECONDS*1000);
+}
+
+/* ===========================
+   Center toast controls
+   =========================== */
+function showCenterToast(title, msg, correct, seconds){
+  centerToast.style.display = 'block';
+  centerToast.classList.remove('correct','wrong');
+  centerToast.classList.add(correct ? 'correct' : 'wrong');
+  toastTitle.textContent = title;
+  toastMsg.textContent = msg;
+  countdownEl.textContent = seconds;
+}
+function hideCenterToast(){
+  centerToast.style.display = 'none';
+}
+
+/* ===========================
+   Leaderboard (localStorage)
+   =========================== */
+const LB_KEY = 'tankvn_leaderboard';
+function saveScore(name, sc){
+  if(!name) name = 'Người chơi';
+  const list = JSON.parse(localStorage.getItem(LB_KEY) || '[]');
+  list.push({ name, score: sc, date: (new Date()).toISOString() });
+  list.sort((a,b)=> b.score - a.score);
+  localStorage.setItem(LB_KEY, JSON.stringify(list.slice(0,20)));
+}
+function updateLeaderboard(){
+  const list = JSON.parse(localStorage.getItem(LB_KEY) || '[]');
+  leaderboardEl.innerHTML = '';
+  if(list.length===0){
+    const li = document.createElement('li');
+    li.textContent = 'Chưa có ai ghi điểm';
+    leaderboardEl.appendChild(li);
+    return;
+  }
+  list.slice(0,10).forEach((entry, idx)=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${idx+1}. ${entry.name}</span><strong>${entry.score} điểm</strong>`;
+    leaderboardEl.appendChild(li);
+  });
+}
+
+/* ===========================
+   START / RESTART handlers
+   =========================== */
+startBtn.addEventListener('click', ()=>{
+  const val = (playerNameInput.value || '').trim();
+  if(!val) { alert('Vui lòng nhập tên của bạn'); playerNameInput.focus(); return; }
+  playerName = val;
+  playerNameShow.textContent = playerName;
+  loginPanel.style.display = 'none';
+  inGameInfo.style.display = 'block';
+  currentIndex = 0;
+  score = 0;
+  updateLeaderboard();
+  showQuestion(currentIndex);
+});
+
+restartBtn.addEventListener('click', ()=>{
+  // reset
+  playerName = playerName || 'Người chơi';
+  currentIndex = 0;
+  score = 0;
+  updateUI();
+  hideCenterToast();
+  showQuestion(currentIndex);
+});
+
+/* catch Enter key on input to submit */
+answerInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); onAnswerSubmit(); }
+});
+answerBtn.addEventListener('click', onAnswerSubmit);
+
+/* ===========================
+   Init
+   =========================== */
+(function init(){
+  // prepare background slideshow (if images absent, still ok)
+  // Images expected: bg1.jpg ... bg34.jpg in same folder. Change BG_PREFIX/BG_EXT above if different.
+  startSlideshow();
+
+  // show starter text and leaderboard
+  qText.textContent = "Nhập tên rồi bấm Bắt đầu để bắt đầu trò chơi. 100 câu, mỗi câu 1 điểm.";
+  updateUI();
+  updateLeaderboard();
+
+  // ensure audio context resumes on user gesture for some browsers
+  document.addEventListener('click', function resumeAudio(){ 
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    document.removeEventListener('click', resumeAudio);
+  });
+})();
+</script>
 </body>
 </html>
