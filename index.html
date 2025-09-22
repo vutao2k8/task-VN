@@ -119,6 +119,15 @@
     margin-top:8px;
     color:rgba(255,255,255,0.85);
     font-size:13px;
+    align-items:center;
+  }
+
+  /* timer style */
+  .timer {
+    background: rgba(255,255,255,0.04);
+    padding:6px 10px;
+    border-radius:8px;
+    font-weight:700;
   }
 
   /* Right: leaderboard & controls */
@@ -199,6 +208,7 @@
         <div class="meta">
           <div id="scoreDisplay" class="small">Điểm: 0 / 100</div>
           <div id="qIndexDisplay" class="small">Câu: 0 / 100</div>
+          <div id="timerDisplay" class="timer">⏳ 15s</div>
         </div>
       </div>
 
@@ -214,7 +224,10 @@
         <div id="inGameInfo" style="display:none;">
           <div class="small">Người chơi: <strong id="playerNameShow"></strong></div>
           <div style="height:10px"></div>
-          <button id="restartBtn" class="btn" style="background:#ff6b6b;">Chơi lại</button>
+          <div style="display:flex;gap:8px;">
+            <button id="restartBtn" class="btn" style="background:#ff6b6b;">Chơi lại</button>
+            <button id="toggleBgmBtn" class="btn" style="background:#6bffb0;">Tắt nhạc</button>
+          </div>
         </div>
       </div>
 
@@ -242,8 +255,9 @@ const TOTAL_QUESTIONS = 100;
 const SLIDESHOW_INTERVAL_MS = 5000; // change background every 5s
 const TOAST_SHOW_SECONDS = 5;       // show toast for 5s before next question
 const BG_COUNT = 34;                // number of background images (bg1.jpg ... bg34.jpg)
-const BG_PREFIX = 'bg';            // change if your naming different (bg1.jpg etc)
-const BG_EXT = '.jpg';             // extension for background images
+const BG_PREFIX = 'bg';             // bg1.jpg...
+const BG_EXT = '.jpg';              // extension for background images
+const TIME_PER_QUESTION = 15;       // seconds per question
 
 const questions = [
   { question: "(1) Ai là người sáng lập nước Văn Lang?", answer: "Hùng Vương" },
@@ -256,7 +270,7 @@ const questions = [
   { question: "(8) Ai là danh y nổi tiếng với tên Hải Thượng Lãn Ông?", answer: "Lê Hữu Trác" },
   { question: "(9) Ai là tác giả Truyện Kiều?", answer: "Nguyễn Du" },
   { question: "(10) Ai là người sáng lập triều Nguyễn?", answer: "Gia Long" },
-
+  /* ... (giữ nguyên danh sách 100 câu như trước) ... */
   { question: "(11) Ai được gọi là Anh hùng áo vải?", answer: "Quang Trung" },
   { question: "(12) Ai là nữ tướng nổi tiếng thời Hai Bà Trưng?", answer: "Bùi Thị Xuân" },
   { question: "(13) Ai là tổng đốc tử thủ thành Hà Nội năm 1882?", answer: "Hoàng Diệu" },
@@ -267,7 +281,6 @@ const questions = [
   { question: "(18) Ai là người sáng lập đạo Cao Đài?", answer: "Ngô Văn Chiêu" },
   { question: "(19) Ai là vua nổi tiếng với chính sách “Ngụ binh ư nông”?", answer: "Trần Hưng Đạo" },
   { question: "(20) Ai là nhà toán học nổi tiếng thời Lê?", answer: "Lương Thế Vinh" },
-
   { question: "(21) Hồ Hoàn Kiếm gắn với truyền thuyết vua nào?", answer: "Lê Lợi" },
   { question: "(22) Văn Miếu – Quốc Tử Giám được lập dưới triều nào?", answer: "Lý Thánh Tông" },
   { question: "(23) Ai là vua đầu tiên đặt niên hiệu ở Việt Nam?", answer: "Lý Nam Đế" },
@@ -278,7 +291,6 @@ const questions = [
   { question: "(28) Ai là người chỉ huy khởi nghĩa Bãi Sậy?", answer: "Nguyễn Thiện Thuật" },
   { question: "(29) Ai là vua cuối cùng của triều Lê?", answer: "Lê Chiêu Thống" },
   { question: "(30) Ai là vua cuối cùng của triều Nguyễn?", answer: "Bảo Đại" },
-
   { question: "(31) Quốc hiệu đầu tiên của nước ta là gì?", answer: "Văn Lang" },
   { question: "(32) Quốc hiệu Đại Việt được đặt dưới triều nào?", answer: "Lý" },
   { question: "(33) Quốc hiệu Đại Ngu thuộc triều nào?", answer: "Hồ" },
@@ -289,7 +301,6 @@ const questions = [
   { question: "(38) Ai là nhà yêu nước chủ trương Duy Tân?", answer: "Phan Chu Trinh" },
   { question: "(39) Ai là người sáng tác Quốc ca Việt Nam?", answer: "Văn Cao" },
   { question: "(40) Ai là Chủ tịch nước Việt Nam Dân chủ Cộng hòa đầu tiên?", answer: "Hồ Chí Minh" },
-
   { question: "(41) Ai là tổng tư lệnh Quân đội Nhân dân Việt Nam?", answer: "Võ Nguyên Giáp" },
   { question: "(42) Trận Điện Biên Phủ diễn ra năm nào?", answer: "1954" },
   { question: "(43) Hiệp định Paris được ký kết năm nào?", answer: "1973" },
@@ -300,7 +311,6 @@ const questions = [
   { question: "(48) Ai là Tổng Bí thư trong Cách mạng tháng Tám?", answer: "Trường Chinh" },
   { question: "(49) Quốc khánh Việt Nam là ngày nào?", answer: "2/9/1945" },
   { question: "(50) Ngày Giải phóng miền Nam là ngày nào?", answer: "30/4/1975" },
-
   { question: "(51) Ai là người khởi nghĩa Yên Thế?", answer: "Hoàng Hoa Thám" },
   { question: "(52) Ai là vua lập ra triều Tiền Lê?", answer: "Lê Đại Hành" },
   { question: "(53) Ai là người đánh tan quân Nam Hán trên sông Bạch Đằng?", answer: "Ngô Quyền" },
@@ -311,7 +321,6 @@ const questions = [
   { question: "(58) Ai là vua đầu tiên của triều Lý?", answer: "Lý Công Uẩn" },
   { question: "(59) Ai là nhà sử học viết Đại Việt sử ký toàn thư?", answer: "Ngô Sĩ Liên" },
   { question: "(60) Ai là thi sĩ tác giả Chinh phụ ngâm?", answer: "Đặng Trần Côn" },
-
   { question: "(61) Ai là nhà thơ làm quan triều Mạc, nổi tiếng với Truyền kỳ mạn lục?", answer: "Nguyễn Dữ" },
   { question: "(62) Ai là người đặt nền móng văn học chữ Nôm?", answer: "Nguyễn Trãi" },
   { question: "(63) Ai là tác giả thơ “Nam quốc sơn hà”?", answer: "Lý Thường Kiệt" },
@@ -322,7 +331,6 @@ const questions = [
   { question: "(68) Ai là vua có công mở mang bờ cõi phương Nam?", answer: "Nguyễn Hoàng" },
   { question: "(69) Ai là nhà văn hóa nổi tiếng thời Nguyễn?", answer: "Nguyễn Đình Chiểu" },
   { question: "(70) Ai là nhà yêu nước với tác phẩm Hịch khởi nghĩa?", answer: "Phan Bội Châu" },
-
   { question: "(71) Ai là người khai phá vùng đất Nam Bộ?", answer: "Nguyễn Hữu Cảnh" },
   { question: "(72) Ai là nhà thơ nổi tiếng với tác phẩm Lục Vân Tiên?", answer: "Nguyễn Đình Chiểu" },
   { question: "(73) Ai là vua có công thống nhất đất nước sau loạn 12 sứ quân?", answer: "Đinh Bộ Lĩnh" },
@@ -333,7 +341,6 @@ const questions = [
   { question: "(78) Ai là danh tướng nổi tiếng triều Trần, em Trần Hưng Đạo?", answer: "Trần Quang Khải" },
   { question: "(79) Ai là danh tướng nhà Lý, từng đánh Tống?", answer: "Tôn Đản" },
   { question: "(80) Ai là anh hùng nông dân thế kỷ XVIII?", answer: "Nguyễn Tuyển" },
-
   { question: "(81) Ai là vua khởi xướng cải cách Minh Trị ở Việt Nam?", answer: "Không có, ở Nhật Bản" },
   { question: "(82) Ai là thủ lĩnh khởi nghĩa Hương Khê?", answer: "Phan Đình Phùng" },
   { question: "(83) Ai là thủ lĩnh khởi nghĩa Ba Đình?", answer: "Đinh Công Tráng" },
@@ -344,7 +351,6 @@ const questions = [
   { question: "(88) Ai là người chỉ huy quân Giải phóng tiến vào Dinh Độc Lập 1975?", answer: "Bùi Quang Thận" },
   { question: "(89) Ai là nhạc sĩ sáng tác “Tiến quân ca”?", answer: "Văn Cao" },
   { question: "(90) Ai là nhà thơ được mệnh danh là “ông hoàng thơ tình”?", answer: "Xuân Diệu" },
-
   { question: "(91) Ai là nhà thơ với tập Nhật ký trong tù?", answer: "Hồ Chí Minh" },
   { question: "(92) Ai là người thành lập Nhà máy in tiền đầu tiên?", answer: "Trần Đại Nghĩa" },
   { question: "(93) Ai là người mở chiến dịch Hồ Chí Minh 1975?", answer: "Văn Tiến Dũng" },
@@ -367,6 +373,19 @@ let answeringLocked = false;
 let toastTimer = null;
 let toastCountdownTimer = null;
 
+/* timer */
+let questionTimer = null;
+let timeLeft = TIME_PER_QUESTION;
+
+/* bg slideshow */
+let bgIndex = 1;
+
+/* audio */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = AudioCtx ? new AudioCtx() : null;
+let bgm = null;
+let bgmPlaying = false;
+
 /* ===========================
    DOM refs
    =========================== */
@@ -376,6 +395,7 @@ const answerInput = document.getElementById('answerInput');
 const answerBtn = document.getElementById('answerBtn');
 const scoreDisplay = document.getElementById('scoreDisplay');
 const qIndexDisplay = document.getElementById('qIndexDisplay');
+const timerDisplay = document.getElementById('timerDisplay');
 
 const startBtn = document.getElementById('startBtn');
 const playerNameInput = document.getElementById('playerName');
@@ -383,6 +403,7 @@ const playerNameShow = document.getElementById('playerNameShow');
 const restartBtn = document.getElementById('restartBtn');
 const loginPanel = document.getElementById('loginPanel');
 const inGameInfo = document.getElementById('inGameInfo');
+const toggleBgmBtn = document.getElementById('toggleBgmBtn');
 
 const centerToast = document.getElementById('centerToast');
 const toastTitle = document.getElementById('toastTitle');
@@ -394,9 +415,6 @@ const leaderboardEl = document.getElementById('leaderboard');
 /* ===========================
    AUDIO: Web Audio simple beeps
    =========================== */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-const audioCtx = AudioCtx ? new AudioCtx() : null;
-
 function beep(frequency=440, duration=150, type='sine', ramp=0.02){
   if(!audioCtx) return;
   const o = audioCtx.createOscillator();
@@ -413,31 +431,52 @@ function beep(frequency=440, duration=150, type='sine', ramp=0.02){
 }
 
 function playCorrect(){
-  // short melody
+  if(audioCtx && audioCtx.state === 'suspended'){ try{ audioCtx.resume(); }catch(e){} }
   beep(880,90); setTimeout(()=>beep(1100,70),90);
 }
 function playWrong(){
+  if(audioCtx && audioCtx.state === 'suspended'){ try{ audioCtx.resume(); }catch(e){} }
   beep(240,300,'square');
 }
 
 /* ===========================
    BACKGROUND SLIDESHOW
    =========================== */
-let bgIndex = 1;
 function setBgImage(i){
-  // try build image URL
   const url = `${BG_PREFIX}${i}${BG_EXT}`;
-  // preload to check if exists? We'll just set background; if not found browser shows broken image — but css background with url won't show error.
   bgEl.style.background = `url("${url}") center/cover no-repeat`;
 }
 function startSlideshow(){
-  // initial
   setBgImage(bgIndex);
   setInterval(()=>{
     bgIndex++;
     if(bgIndex>BG_COUNT) bgIndex = 1;
     setBgImage(bgIndex);
   }, SLIDESHOW_INTERVAL_MS);
+}
+
+/* ===========================
+   BGM control
+   =========================== */
+function initBgm(){
+  if(!bgm){
+    bgm = new Audio("task.mp3");
+    bgm.loop = true;
+    bgm.volume = 0.33;
+    bgm.preload = 'auto';
+  }
+}
+function playBgm(){
+  if(!bgm) initBgm();
+  // resume audio context if present (for beep sounds)
+  if(audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
+  }
+  bgm.play().then(()=>{ bgmPlaying = true; toggleBgmBtn.textContent = 'Tắt nhạc'; })
+  .catch(()=>{ /* autoplay blocked, will resume on user gesture */ });
+}
+function pauseBgm(){
+  if(bgm){ bgm.pause(); bgmPlaying = false; toggleBgmBtn.textContent = 'Mở nhạc'; }
 }
 
 /* ===========================
@@ -456,14 +495,29 @@ function showQuestion(idx){
   updateUI();
   answeringLocked = false;
   answerBtn.disabled = false;
+  answerInput.disabled = false;
+  startQuestionTimer();
 }
 
-function endGame(){
-  // save score
-  saveScore(playerName, score);
-  updateLeaderboard();
-  // show final toast then show top list area (we keep UI simple: replace question box by final toast)
-  showCenterToast(`Trò chơi kết thúc`, `Bạn: ${playerName} — Điểm: ${score}`, false, 5);
+/* ===========================
+   TIMER: per-question countdown
+   =========================== */
+function startQuestionTimer(){
+  clearInterval(questionTimer);
+  timeLeft = TIME_PER_QUESTION;
+  timerDisplay.textContent = `⏳ ${timeLeft}s`;
+  questionTimer = setInterval(()=>{
+    timeLeft--;
+    if(timeLeft < 0) timeLeft = 0;
+    timerDisplay.textContent = `⏳ ${timeLeft}s`;
+    if(timeLeft <= 0){
+      clearInterval(questionTimer);
+      handleTimeUp();
+    }
+  },1000);
+}
+function stopQuestionTimer(){
+  clearInterval(questionTimer);
 }
 
 /* ===========================
@@ -472,12 +526,15 @@ function endGame(){
 function onAnswerSubmit(){
   if(answeringLocked) return;
   answeringLocked = true;
+  stopQuestionTimer();
   const user = (answerInput.value || '').trim();
   const correct = (questions[currentIndex].answer || '').trim();
 
-  // compare case-insensitive, normalized
   const normalize = s => s.replace(/\s+/g,' ').trim().toLowerCase();
   const isCorrect = normalize(user) === normalize(correct);
+
+  // clear any existing toast timers
+  clearToastTimers();
 
   if(isCorrect){
     score += 1;            // each question 1 điểm
@@ -492,7 +549,7 @@ function onAnswerSubmit(){
   answerBtn.disabled = true;
   answerInput.disabled = true;
 
-  // after toast seconds -> move to next
+  // countdown inside toast
   let remaining = TOAST_SHOW_SECONDS;
   countdownEl.textContent = remaining;
   toastCountdownTimer = setInterval(()=>{
@@ -500,18 +557,51 @@ function onAnswerSubmit(){
     if(remaining>=0) countdownEl.textContent = remaining;
   },1000);
 
-  toastTimer = setTimeout(()=>{
-    clearInterval(toastCountdownTimer);
-    hideCenterToast();
-    // next question
-    currentIndex++;
-    answerInput.disabled = false;
-    if(currentIndex < TOTAL_QUESTIONS && currentIndex < questions.length){
-      showQuestion(currentIndex);
-    } else {
-      endGame();
-    }
-  }, TOAST_SHOW_SECONDS*1000);
+  toastTimer = setTimeout(()=>{ proceedToNextAfterToast(); }, TOAST_SHOW_SECONDS*1000);
+}
+
+/* called when time runs out */
+function handleTimeUp(){
+  if(answeringLocked) return;
+  answeringLocked = true;
+  const correct = (questions[currentIndex].answer || '').trim();
+  playWrong();
+  showCenterToast("Hết giờ!", `Đáp án đúng: ${correct}`, false, TOAST_SHOW_SECONDS);
+
+  // disable input
+  answerBtn.disabled = true;
+  answerInput.disabled = true;
+
+  // countdown inside toast
+  clearToastTimers();
+  let remaining = TOAST_SHOW_SECONDS;
+  countdownEl.textContent = remaining;
+  toastCountdownTimer = setInterval(()=>{
+    remaining--;
+    if(remaining>=0) countdownEl.textContent = remaining;
+  },1000);
+
+  toastTimer = setTimeout(()=>{ proceedToNextAfterToast(); }, TOAST_SHOW_SECONDS*1000);
+}
+
+/* proceed to next question (used by both onAnswerSubmit and time up) */
+function proceedToNextAfterToast(){
+  clearToastTimers();
+  hideCenterToast();
+  currentIndex++;
+  answeringLocked = false;
+  answerInput.disabled = false;
+  if(currentIndex < TOTAL_QUESTIONS && currentIndex < questions.length){
+    showQuestion(currentIndex);
+  } else {
+    endGame();
+  }
+}
+
+/* clear existing toast timers */
+function clearToastTimers(){
+  if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+  if(toastCountdownTimer){ clearInterval(toastCountdownTimer); toastCountdownTimer = null; }
 }
 
 /* ===========================
@@ -569,17 +659,37 @@ startBtn.addEventListener('click', ()=>{
   currentIndex = 0;
   score = 0;
   updateLeaderboard();
+  updateUI();
   showQuestion(currentIndex);
+
+  // enable inputs now, ensure audio context resume and start bgm
+  if(audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
+  }
+  playBgm();
+
+  // Ensure answer input is focused
+  setTimeout(()=>{ answerInput.focus(); }, 100);
 });
 
 restartBtn.addEventListener('click', ()=>{
-  // reset
+  // reset but keep player name
   playerName = playerName || 'Người chơi';
+  playerNameShow.textContent = playerName;
   currentIndex = 0;
   score = 0;
   updateUI();
   hideCenterToast();
+  clearToastTimers();
+  stopQuestionTimer();
   showQuestion(currentIndex);
+  if(!bgmPlaying) playBgm();
+});
+
+/* toggle background music */
+toggleBgmBtn.addEventListener('click', ()=>{
+  if(bgmPlaying){ pauseBgm(); }
+  else { playBgm(); }
 });
 
 /* catch Enter key on input to submit */
@@ -589,25 +699,45 @@ answerInput.addEventListener('keydown', (e)=>{
 answerBtn.addEventListener('click', onAnswerSubmit);
 
 /* ===========================
+   End game
+   =========================== */
+function endGame(){
+  stopQuestionTimer();
+  // save score
+  saveScore(playerName, score);
+  updateLeaderboard();
+  // show final toast
+  showCenterToast(`Trò chơi kết thúc`, `Bạn: ${playerName} — Điểm: ${score}`, true, 8);
+  // stop bgm? keep playing — up to bạn. currently we'll keep playing.
+}
+
+/* ===========================
    Init
    =========================== */
 (function init(){
-  // prepare background slideshow (if images absent, still ok)
-  // Images expected: bg1.jpg ... bg34.jpg in same folder. Change BG_PREFIX/BG_EXT above if different.
+  // prepare background slideshow
   startSlideshow();
 
-  // show starter text and leaderboard
-  qText.textContent = "Nhập tên rồi bấm Bắt đầu để bắt đầu trò chơi. 100 câu, mỗi câu 1 điểm.";
+  // initial UI: disable answer box until player starts
+  answerInput.disabled = true;
+  answerBtn.disabled = false; // but it won't work until player logs in
+
+  // timer display initial
+  timerDisplay.textContent = `⏳ ${TIME_PER_QUESTION}s`;
+
   updateUI();
   updateLeaderboard();
 
-  // ensure audio context resumes on user gesture for some browsers
-  document.addEventListener('click', function resumeAudio(){ 
-    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    document.removeEventListener('click', resumeAudio);
-  });
+  // prepare bgm (but don't play until user clicks "Bắt đầu")
+  initBgm();
+
+  // resume audio context on first user gesture (some browsers)
+  function resumeAudioOnGesture(){
+    if(audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume().catch(()=>{}); }
+    document.removeEventListener('click', resumeAudioOnGesture);
+  }
+  document.addEventListener('click', resumeAudioOnGesture);
 })();
 </script>
 </body>
 </html>
-
